@@ -6,7 +6,7 @@ FOR AN M1/M2 Mac!!! you might need to:
 https://developer.apple.com/forums/thread/718722
 
 2. Instead of running the first command below, you might need to run the following from the Rosetta terminals follows:
-CONDA_SUBDIR=osx-64 conda create "python38env" python=3.8
+CONDA_SUBDIR=osx-64 conda create -n "python38env" python=3.8
 
 If you are not sure which instruction set the terminal is using, try the "arch" command. If you get back arm64, this is M1/M2 instruction set (will not work for Turi). If you get back "i386" or "x86_64" this is using the instruction set needed for Turi.
 

@@ -77,7 +77,7 @@ class JSONPostHandler(BaseHandler):
         self.write_json(
             {"arg1":data['arg'][0]*2,
             "arg2":data['arg'],
-            "arg3":[32,4.5,"Eric Rocks!","some_disagree"]})
+            "arg3":[32,4.5,"Eric Rocks!","some_disagree","Other's Don't"]})
 
 
 class LogToDatabaseHandler(BaseHandler):
