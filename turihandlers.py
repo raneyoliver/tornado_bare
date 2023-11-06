@@ -55,7 +55,7 @@ class RequestNewDatasetId(BaseHandler):
             newSessionId = float(a['dsid'])+1
         self.write_json({"dsid":newSessionId})
 
-class UpdateModelForDatasetId(BaseHandler):
+class UpdateModelForDatasetIdTuri(BaseHandler):
     def get(self):
         '''Train a new model (or update) for given dataset ID
         '''
@@ -94,7 +94,7 @@ class UpdateModelForDatasetId(BaseHandler):
         # send back the SFrame of the data
         return tc.SFrame(data=data)
 
-class PredictOneFromDatasetId(BaseHandler):
+class PredictOneFromDatasetIdTuri(BaseHandler):
     def post(self):
         '''Predict the class of a sent feature vector
         '''
