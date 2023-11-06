@@ -11,6 +11,9 @@ from tornado.options import define, options
 from basehandler import BaseHandler
 
 import turicreate as tc
+from sklearn.neighbors import KNeighborsClassifier
+from joblib import dump, load
+
 import pickle
 from bson.binary import Binary
 import json
@@ -123,3 +126,61 @@ class PredictOneFromDatasetIdTuri(BaseHandler):
 
         # send back the SFrame of the data
         return tc.SFrame(data=data)
+
+# TODO: test out the sklearn dataset responding 
+class UpdateModelForDatasetIdSklearn(BaseHandler):
+    def get(self):
+        '''Train a new model (or update) for given dataset ID
+        '''
+        dsid = self.get_int_arg("dsid",default=0)
+
+        # create feature vectors and labels from database
+        features = []
+        labels   = []
+        for a in self.db.labeledinstances.find({"dsid":dsid}): 
+            features.append([float(val) for val in a['feature']])
+            labels.append(a['label'])
+
+        # fit the model to the data
+        model = KNeighborsClassifier(n_neighbors=1);
+        acc = -1;
+        if labels:
+            model.fit(features,labels) # training
+            lstar = model.predict(features)
+            self.clf = model
+            acc = sum(lstar==labels)/float(len(labels))
+
+            # just write this to model files directory
+            dump(model, '../models/sklearn_model_dsid%d.joblib'%(dsid))
+
+
+        # send back the resubstitution accuracy
+        # if training takes a while, we are blocking tornado!! No!!
+        self.write_json({"resubAccuracy":acc})
+
+
+
+
+class PredictOneFromDatasetIdSklearn(BaseHandler):
+    def post(self):
+        '''Predict the class of a sent feature vector
+        '''
+        data = json.loads(self.request.body.decode("utf-8"))    
+
+        vals = data['feature'];
+        fvals = [float(val) for val in vals];
+        fvals = np.array(fvals).reshape(1, -1)
+        dsid  = data['dsid']
+
+        # load the model (using pickle)
+        if(self.clf == []):
+            # load from file if needed
+            print('Loading Model From DB')
+            tmp = load('../models/sklearn_model_dsid%d.joblib'%(dsid)) 
+            self.clf = pickle.loads(tmp['model'])
+
+        predLabel = self.clf.predict(fvals);
+        self.write_json({"prediction":str(predLabel)})
+
+
+

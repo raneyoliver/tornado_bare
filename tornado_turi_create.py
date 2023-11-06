@@ -39,12 +39,14 @@ class Application(tornado.web.Application):
            connect to database
         '''
 
+
+        # CHOOSE HERE IS YOU WANT TURI OR SKLEARN!!!
         handlers = [(r"/[/]?", BaseHandler),
                     (r"/Handlers[/]?",        th.PrintHandlers),
                     (r"/AddDataPoint[/]?",    th.UploadLabeledDatapointHandler),
                     (r"/GetNewDatasetId[/]?", th.RequestNewDatasetId),
-                    (r"/UpdateModel[/]?",     th.UpdateModelForDatasetIdTuri),     
-                    (r"/PredictOne[/]?",      th.PredictOneFromDatasetIdTuri),  
+                    (r"/UpdateModel[/]?",     th.UpdateModelForDatasetIdSklearn),     
+                    (r"/PredictOne[/]?",      th.PredictOneFromDatasetIdSklearn),  
                     (r"/GetExample[/]?",      eh.TestHandler),
                     (r"/DoPost[/]?",          eh.PostHandlerAsGetArguments),
                     (r"/PostWithJson[/]?",    eh.JSONPostHandler),
