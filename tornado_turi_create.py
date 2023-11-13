@@ -50,7 +50,8 @@ class Application(tornado.web.Application):
                     (r"/GetExample[/]?",      eh.TestHandler),
                     (r"/DoPost[/]?",          eh.PostHandlerAsGetArguments),
                     (r"/PostWithJson[/]?",    eh.JSONPostHandler),
-                    (r"/MSLC[/]?",            eh.MSLC),             
+                    (r"/MSLC[/]?",            eh.MSLC), 
+                    (r"/GetLargestDatasetId[/]?",    th.GetLargestDatasetId),            
                     ]
 
         self.handlers_string = str(handlers)

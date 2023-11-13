@@ -19,6 +19,8 @@ from bson.binary import Binary
 import json
 import numpy as np
 
+models_dict = {}
+
 class PrintHandlers(BaseHandler):
     def get(self):
         '''Write out to screen the handlers used
@@ -58,6 +60,17 @@ class RequestNewDatasetId(BaseHandler):
             newSessionId = float(a['dsid'])+1
         self.write_json({"dsid":newSessionId})
 
+class GetLargestDatasetId(BaseHandler):
+    def get(self):
+        '''Get largest ID from all available datasets
+        '''
+        a = self.db.labeledinstances.find_one(sort=[("dsid", -1)])
+        if a == None:
+            largestId = 1
+        else:
+            largestId = float(a['dsid'])
+        self.write_json({"dsid":largestId})
+
 class UpdateModelForDatasetIdTuri(BaseHandler):
     def get(self):
         '''Train a new model (or update) for given dataset ID
@@ -73,7 +86,8 @@ class UpdateModelForDatasetIdTuri(BaseHandler):
             
             model = tc.classifier.create(data,target='target',verbose=0)# training
             yhat = model.predict(data)
-            self.clf = model
+            models_dict[dsid] = model
+            self.clf = models_dict[dsid]
             acc = sum(yhat==data['target'])/float(len(data))
             # save model for use later, if desired
             model.save('../models/turi_model_dsid%d'%(dsid))
@@ -107,10 +121,11 @@ class PredictOneFromDatasetIdTuri(BaseHandler):
 
         # load the model from the database (using pickle)
         # we are blocking tornado!! no!!
-        if(self.clf == []):
+        if dsid not in models_dict.keys():
             print('Loading Model From file')
-            self.clf = tc.load_model('../models/turi_model_dsid%d'%(dsid))
-  
+            models_dict[dsid] = tc.load_model('../models/turi_model_dsid%d'%(dsid))
+
+        self.clf = models_dict[dsid]
 
         predLabel = self.clf.predict(fvals);
         self.write_json({"prediction":str(predLabel)})
@@ -147,7 +162,8 @@ class UpdateModelForDatasetIdSklearn(BaseHandler):
         if labels:
             model.fit(features,labels) # training
             lstar = model.predict(features)
-            self.clf = model
+            models_dict[dsid] = model
+            self.clf = models_dict[dsid]
             acc = sum(lstar==labels)/float(len(labels))
 
             # just write this to model files directory
@@ -173,12 +189,20 @@ class PredictOneFromDatasetIdSklearn(BaseHandler):
         dsid  = data['dsid']
 
         # load the model (using pickle)
-        if(self.clf == []):
+        if dsid not in models_dict.keys():
             # load from file if needed
             print('Loading Model From DB')
-            tmp = load('../models/sklearn_model_dsid%d.joblib'%(dsid)) 
-            self.clf = pickle.loads(tmp['model'])
+            try:
+                model = load('../models/sklearn_model_dsid%d.joblib'%(dsid)) 
+                #model = pickle.loads(tmp['model'])
+                models_dict[dsid] = model
 
+            except:
+                self.write_json({"prediction":f"No Model for DSID {dsid}"})
+                return
+            
+            
+        self.clf = models_dict[dsid]
         predLabel = self.clf.predict(fvals);
         self.write_json({"prediction":str(predLabel)})
 
