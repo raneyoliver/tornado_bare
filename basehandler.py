@@ -48,6 +48,8 @@ class HTTPJSONError(Exception):
         return json_str(message)
 
 class BaseHandler(tornado.web.RequestHandler):
+    use_knn = True
+
     def get(self):
         '''Default get request, return a 404
            HTTP error

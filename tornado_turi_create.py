@@ -51,7 +51,8 @@ class Application(tornado.web.Application):
                     (r"/DoPost[/]?",          eh.PostHandlerAsGetArguments),
                     (r"/PostWithJson[/]?",    eh.JSONPostHandler),
                     (r"/MSLC[/]?",            eh.MSLC), 
-                    (r"/GetLargestDatasetId[/]?",    th.GetLargestDatasetId),            
+                    (r"/GetLargestDatasetId[/]?",    th.GetLargestDatasetId), 
+                    (r"/ChangeModel[/]?",    th.ChangeModel),            
                     ]
 
         self.handlers_string = str(handlers)
